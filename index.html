@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="AboRadar 1209 - Extreme Web App zur Verwaltung von Abonnements, Fristen und Erinnerungen." />
+  <title>AboRadar 1209</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="1209.png" />
+  <link rel="apple-touch-icon" href="1209.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero glass">
+      <div class="hero-left">
+        <div class="brand">
+          <img src="1209.png" alt="AboRadar 1209 Logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Web App + PWA + Reminder Engine</p>
+            <h1>AboRadar <span>1209</span></h1>
+            <p class="subtitle">Verfolge deine Abos, Kündigungsfristen und Kosten, bevor wieder irgendein Dienst still und heimlich dein Geld frisst.</p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button id="installBtn" class="primary ghost hidden">App installieren</button>
+          <button id="notifyBtn" class="primary">Benachrichtigungen aktivieren</button>
+          <button id="demoBtn" class="secondary">Demo-Daten laden</button>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="stat-card">
+          <span>Monatlich</span>
+          <strong id="monthlyTotal">0,00 €</strong>
+        </div>
+        <div class="stat-card">
+          <span>Jährlich</span>
+          <strong id="yearlyTotal">0,00 €</strong>
+        </div>
+        <div class="stat-card danger">
+          <span>Bald fällig</span>
+          <strong id="urgentCount">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="panel form-panel glass">
+        <div class="panel-header">
+          <h2>Abo anlegen oder bearbeiten</h2>
+          <button id="resetFormBtn" class="tiny-btn">Zurücksetzen</button>
+        </div>
+        <form id="subscriptionForm" class="subscription-form">
+          <input type="hidden" id="subscriptionId" />
+          <div class="grid-2">
+            <label>
+              <span>Name</span>
+              <input id="name" required placeholder="z. B. Netflix" />
+            </label>
+            <label>
+              <span>Kategorie</span>
+              <input id="category" list="categoryList" placeholder="Streaming, Fitness, Software..." />
+            </label>
+            <label>
+              <span>Preis</span>
+              <input id="price" type="number" step="0.01" min="0" placeholder="9.99" required />
+            </label>
+            <label>
+              <span>Währung</span>
+              <select id="currency">
+                <option value="EUR">EUR €</option>
+                <option value="USD">USD $</option>
+                <option value="GBP">GBP £</option>
+                <option value="TRY">TRY ₺</option>
+              </select>
+            </label>
+            <label>
+              <span>Abrechnungszyklus</span>
+              <select id="billingCycle">
+                <option value="monthly">Monatlich</option>
+                <option value="yearly">Jährlich</option>
+                <option value="weekly">Wöchentlich</option>
+                <option value="quarterly">Quartalsweise</option>
+                <option value="custom">Benutzerdefiniert</option>
+              </select>
+            </label>
+            <label>
+              <span>Benutzerdefinierte Tage</span>
+              <input id="customDays" type="number" min="1" placeholder="Nur für benutzerdefiniert" />
+            </label>
+            <label>
+              <span>Nächste Abbuchung</span>
+              <input id="nextBillingDate" type="date" required />
+            </label>
+            <label>
+              <span>Kündigungsfrist endet am</span>
+              <input id="deadlineDate" type="date" required />
+            </label>
+            <label>
+              <span>Anbieter-Link</span>
+              <input id="website" type="url" placeholder="https://..." />
+            </label>
+            <label>
+              <span>Tags</span>
+              <input id="tags" placeholder="z. B. video, familie" />
+            </label>
+            <label>
+              <span>Grace Period (Tage)</span>
+              <input id="graceDays" type="number" min="0" value="0" />
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="status">
+                <option value="active">Aktiv</option>
+                <option value="trial">Testphase</option>
+                <option value="paused">Pausiert</option>
+                <option value="cancelled">Gekündigt</option>
+              </select>
+            </label>
+          </div>
+          <div class="row-switches">
+            <label class="toggle"><input id="autoRenew" type="checkbox" checked /><span>Automatische Verlängerung</span></label>
+            <label class="toggle"><input id="notifyEnabled" type="checkbox" checked /><span>Erinnerungen aktiv</span></label>
+            <label class="toggle"><input id="isTrial" type="checkbox" /><span>Gratis-Test markieren</span></label>
+          </div>
+          <label>
+            <span>Notizen</span>
+            <textarea id="notes" rows="3" placeholder="Kündigung nur im Browser, Passwortmanager prüfen, Hotline meiden..."></textarea>
+          </label>
+          <div class="form-actions">
+            <button class="primary" type="submit">Speichern</button>
+            <button class="secondary" type="button" id="duplicateBtn">Duplizieren</button>
+          </div>
+        </form>
+        <datalist id="categoryList"></datalist>
+      </section>
+
+      <section class="panel dashboard glass">
+        <div class="panel-header">
+          <h2>Dashboard</h2>
+          <div class="header-tools">
+            <select id="themeSelect">
+              <option value="system">System</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+            <button id="backupBtn" class="tiny-btn">Backup erstellen</button>
+          </div>
+        </div>
+
+        <div class="chips" id="quickStats"></div>
+
+        <div class="mini-grid">
+          <article class="mini-panel">
+            <h3>Nächste Fristen</h3>
+            <div id="upcomingList" class="stack-list"></div>
+          </article>
+          <article class="mini-panel">
+            <h3>Kosten nach Kategorie</h3>
+            <canvas id="categoryChart" width="420" height="240"></canvas>
+          </article>
+          <article class="mini-panel">
+            <h3>30 Features</h3>
+            <ol class="features-list" id="featuresList"></ol>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <section class="panel controls glass">
+      <div class="panel-header">
+        <h2>Suche, Filter, Export</h2>
+        <div class="header-tools">
+          <button id="exportJsonBtn" class="tiny-btn">JSON Export</button>
+          <button id="exportCsvBtn" class="tiny-btn">CSV Export</button>
+          <label class="tiny-btn file-btn">Import <input id="importFile" type="file" accept=".json,.csv" hidden /></label>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input id="searchInput" placeholder="Suchen nach Name, Kategorie, Tags..." />
+        <select id="filterStatus">
+          <option value="all">Alle Status</option>
+          <option value="active">Aktiv</option>
+          <option value="trial">Testphase</option>
+          <option value="paused">Pausiert</option>
+          <option value="cancelled">Gekündigt</option>
+          <option value="archived">Archiviert</option>
+        </select>
+        <select id="filterCategory"><option value="all">Alle Kategorien</option></select>
+        <select id="sortBy">
+          <option value="deadlineAsc">Frist zuerst</option>
+          <option value="costDesc">Preis absteigend</option>
+          <option value="nameAsc">Name A-Z</option>
+          <option value="billingAsc">Nächste Abbuchung</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="panel list-panel glass">
+      <div class="panel-header">
+        <h2>Deine Abonnements</h2>
+        <div class="legend">
+          <span class="pill urgent">0-7 Tage</span>
+          <span class="pill warning">8-14 Tage</span>
+          <span class="pill safe">15+ Tage</span>
+        </div>
+      </div>
+      <div id="subscriptionList" class="card-list"></div>
+    </section>
+  </div>
+
+  <template id="subscriptionCardTemplate">
+    <article class="sub-card">
+      <div class="sub-top">
+        <div>
+          <h3 class="sub-name"></h3>
+          <div class="sub-meta"></div>
+        </div>
+        <div class="sub-price"></div>
+      </div>
+      <div class="sub-timeline"></div>
+      <div class="sub-notes"></div>
+      <div class="sub-tags"></div>
+      <div class="sub-actions">
+        <button data-action="openLink" class="tiny-btn">Webseite</button>
+        <button data-action="edit" class="tiny-btn">Bearbeiten</button>
+        <button data-action="renew" class="tiny-btn">Verlängern</button>
+        <button data-action="archive" class="tiny-btn">Archiv</button>
+        <button data-action="toggleStatus" class="tiny-btn">Status wechseln</button>
+        <button data-action="delete" class="tiny-btn danger-btn">Löschen</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
