@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0d12" />
+  <meta name="description" content="AboManager - minimalistische Web App zum Verwalten von Abonnements, Fristen und Kündigungen." />
+  <title>AboManager</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./1209.png" />
+  <link rel="apple-touch-icon" href="./1209.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar glass">
+      <div class="brand-wrap">
+        <img src="./1209.png" alt="AboManager Logo" class="brand-logo" />
+        <div>
+          <p class="eyebrow">Web App</p>
+          <h1>AboManager</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="installBtn" class="btn btn-ghost hidden">Installieren</button>
+        <button id="notifyBtn" class="btn btn-primary">Benachrichtigungen</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="hero glass">
+        <div class="hero-copy">
+          <p class="eyebrow">Minimalistisch. Clean. Praktisch.</p>
+          <h2>Behalte Kündigungsfristen im Blick, bevor irgendein Abo still dein Geld auffrisst.</h2>
+          <p class="muted">Die App speichert lokal auf deinem Gerät, funktioniert offline als PWA und erinnert dich 7 Tage vorher sowie an den letzten 3 Tagen täglich.</p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span>Aktive Abos</span>
+            <strong id="statActive">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Monatliche Kosten</span>
+            <strong id="statMonthly">0 €</strong>
+          </div>
+          <div class="stat-card warn">
+            <span>Nächste Frist</span>
+            <strong id="statNextDeadline">-</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-two">
+        <section class="panel glass form-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Abo hinzufügen</p>
+              <h3 id="formTitle">Neues Abonnement</h3>
+            </div>
+            <button id="resetFormBtn" class="btn btn-ghost hidden">Zurücksetzen</button>
+          </div>
+
+          <form id="subscriptionForm" class="form-grid">
+            <input type="hidden" id="subId" />
+
+            <label>
+              <span>Name</span>
+              <input id="name" type="text" placeholder="z. B. Netflix" required />
+            </label>
+
+            <label>
+              <span>Kategorie</span>
+              <select id="category">
+                <option>Streaming</option>
+                <option>Musik</option>
+                <option>Software</option>
+                <option>Gaming</option>
+                <option>Fitness</option>
+                <option>Mobilfunk</option>
+                <option>Cloud</option>
+                <option>Sonstiges</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Preis</span>
+              <input id="price" type="number" min="0" step="0.01" placeholder="9.99" required />
+            </label>
+
+            <label>
+              <span>Währung</span>
+              <select id="currency">
+                <option>EUR</option>
+                <option>USD</option>
+                <option>TRY</option>
+                <option>GBP</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Intervall</span>
+              <select id="billingCycle">
+                <option value="monthly">Monatlich</option>
+                <option value="yearly">Jährlich</option>
+                <option value="weekly">Wöchentlich</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Startdatum</span>
+              <input id="startDate" type="date" required />
+            </label>
+
+            <label>
+              <span>Nächste Zahlung</span>
+              <input id="nextChargeDate" type="date" required />
+            </label>
+
+            <label>
+              <span>Kündigungsfrist endet am</span>
+              <input id="deadlineDate" type="date" required />
+            </label>
+
+            <label>
+              <span>Status</span>
+              <select id="status">
+                <option value="active">Aktiv</option>
+                <option value="paused">Pausiert</option>
+                <option value="cancelled">Gekündigt</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Kündigungslink</span>
+              <input id="cancelUrl" type="url" placeholder="https://..." />
+            </label>
+
+            <label class="col-span-2">
+              <span>Notizen</span>
+              <textarea id="notes" rows="3" placeholder="Konto, Passwort-Hinweis, Familienabo, Mindestlaufzeit..."></textarea>
+            </label>
+
+            <div class="col-span-2 form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn">Speichern</button>
+              <button type="button" class="btn btn-ghost" id="sampleBtn">Beispieldaten laden</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel glass list-panel">
+          <div class="panel-head panel-head-wrap">
+            <div>
+              <p class="eyebrow">Übersicht</p>
+              <h3>Deine Abos</h3>
+            </div>
+            <div class="toolbar">
+              <input id="searchInput" class="search" type="search" placeholder="Suchen..." />
+              <select id="filterStatus">
+                <option value="all">Alle Status</option>
+                <option value="active">Aktiv</option>
+                <option value="paused">Pausiert</option>
+                <option value="cancelled">Gekündigt</option>
+              </select>
+              <select id="sortBy">
+                <option value="deadline-asc">Frist zuerst</option>
+                <option value="price-desc">Preis absteigend</option>
+                <option value="price-asc">Preis aufsteigend</option>
+                <option value="name-asc">Name A-Z</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button id="exportBtn" class="btn btn-ghost">Export JSON</button>
+            <label class="btn btn-ghost file-btn">
+              Import JSON
+              <input id="importInput" type="file" accept="application/json" hidden />
+            </label>
+            <button id="clearBtn" class="btn btn-ghost danger">Alles löschen</button>
+          </div>
+
+          <div id="upcomingBanner" class="banner hidden"></div>
+          <div id="subscriptionList" class="subscription-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="subscriptionTemplate">
+    <article class="subscription-card">
+      <div class="subscription-main">
+        <div class="subscription-title-row">
+          <div>
+            <h4 class="sub-name"></h4>
+            <div class="sub-meta"></div>
+          </div>
+          <span class="badge sub-status"></span>
+        </div>
+        <div class="sub-grid">
+          <div>
+            <span class="label">Preis</span>
+            <strong class="sub-price"></strong>
+          </div>
+          <div>
+            <span class="label">Nächste Zahlung</span>
+            <strong class="sub-charge"></strong>
+          </div>
+          <div>
+            <span class="label">Kündigungsfrist</span>
+            <strong class="sub-deadline"></strong>
+          </div>
+          <div>
+            <span class="label">Verbleibend</span>
+            <strong class="sub-days-left"></strong>
+          </div>
+        </div>
+        <p class="sub-notes hidden"></p>
+      </div>
+      <div class="subscription-actions">
+        <a class="btn btn-ghost sub-link hidden" target="_blank" rel="noopener noreferrer">Kündigen</a>
+        <button class="btn btn-ghost sub-edit">Bearbeiten</button>
+        <button class="btn btn-ghost danger sub-delete">Löschen</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

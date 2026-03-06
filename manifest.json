@@ -1,0 +1,22 @@
+{
+  "name": "AboManager",
+  "short_name": "AboManager",
+  "description": "Minimalistische PWA zum Verwalten von Abonnements, Fristen und Kündigungen.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080a0f",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "./1209.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./1209.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
